@@ -27,4 +27,5 @@ public class ConstantUtil {
     public static final String STR_HBLYBZ_0="0";
     public static final String STR_WX_RETURN_CODE_SUCCESS="CDATA[SUCCESS]";
     public static final String STR_WX_RETURN_CODE_FAIL="CDATA[FAIL]";
+    public static final String STR_WX_RETURN_CODE_PAYFAIL="CDATA[支付失败]";
 }

@@ -46,7 +46,7 @@ public class WechatPayUtil {
      */
     private static final String APP_KEY = "UYGWEDIUAWJSOF45256456465DSFSDFG";
     /**
-     * 微信商户证书路径
+     * 微信商户证书路径；java开发使用apiclient_cert.p12，php开发使用apiclient_cert.pem
      */
     private static final String CERT_PATH = "D:\\demo\\apiclient_cert.p12";
     /**
@@ -69,7 +69,7 @@ public class WechatPayUtil {
 
     /**
      * 微信支付红包完整调用示例
-     * wxPayHbServiceFunTest()推荐写在业务逻辑层
+     * wxPayHbServiceFunTest()推荐写在微信红包接口的业务逻辑层
      * @return
      */
     public static String wxPayHbServiceFunTest(){
@@ -85,10 +85,10 @@ public class WechatPayUtil {
             String bb=  WechatPayUtil.ergoticMyregStrFun3BackMatcherData(rstXmlStr, RegexExpConstantUtil.REGEX_RETURN_CODE);
             // SUCCESS
             String returnCode= WechatPayUtil.regReplaceAll(bb,RegexExpConstantUtil.REGEX_RETURN_CODE_CONTENT);
-            if(rstXmlStr.contains(ConstantUtil.STR_WX_RETURN_CODE_SUCCESS)){
+            if(rstXmlStr.contains(ConstantUtil.STR_WX_RETURN_CODE_SUCCESS)&& !rstXmlStr.contains(ConstantUtil.STR_WX_RETURN_CODE_PAYFAIL)){
                 rstMsg="微信支付到零钱成功";
             }
-            else if(rstXmlStr.contains(ConstantUtil.STR_WX_RETURN_CODE_FAIL)){
+            else{
                 rstMsg= "调用微信接口失败, 具体信息请查看访问日志";
             }
         }
@@ -114,7 +114,7 @@ public class WechatPayUtil {
         // 商户名称
         wechatPayReqDTO.setMch_name("第三方红包对接的商户号");
         // 商户appid下，绑定的某微信用户的openid；此微信用户零钱将收款3毛
-        wechatPayReqDTO.setOpenid("oQATF5FVew5M44m8DSIu_Ut9nxOQ");
+        wechatPayReqDTO.setOpenid("商户appid下，绑定的某微信用户的openid");
         // 企业付款金额，这里单位为元
         wechatPayReqDTO.setAmount(0.3);
         // 微信商户appkey
