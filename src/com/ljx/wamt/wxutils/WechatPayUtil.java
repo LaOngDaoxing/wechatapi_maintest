@@ -86,7 +86,7 @@ public class WechatPayUtil {
             // SUCCESS
             String returnCode= WechatPayUtil.regReplaceAll(bb,RegexExpConstantUtil.REGEX_RETURN_CODE_CONTENT);
             if(rstXmlStr.contains(ConstantUtil.STR_WX_RETURN_CODE_SUCCESS)&& !rstXmlStr.contains(ConstantUtil.STR_WX_RETURN_CODE_PAYFAIL)){
-                rstMsg="微信支付到零钱成功";
+                rstMsg= "微信支付到零钱成功";
             }
             else{
                 rstMsg= "调用微信接口失败, 具体信息请查看访问日志";
