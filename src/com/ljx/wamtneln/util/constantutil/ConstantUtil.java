@@ -1,4 +1,4 @@
-package com.ljx.wamtneln.util;
+package com.ljx.wamtneln.util.constantutil;
 
 /**
  * @author ljx

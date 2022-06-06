@@ -1,4 +1,4 @@
-package com.ljx.wamtneln.util;
+package com.ljx.wamtneln.util.stringutil;
 
 import java.math.BigDecimal;
 import java.util.Date;

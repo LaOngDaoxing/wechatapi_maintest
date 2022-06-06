@@ -2,9 +2,11 @@ package com.ljx.wamt.wxutils;
 
 import com.ljx.wamtneln.classextends.KeyStores;
 import com.ljx.wamt.entity.WechatPayReqDTO;
-import com.ljx.wamtneln.util.ConstantUtil;
-import com.ljx.wamtneln.util.MapGetter;
-import com.ljx.wamtneln.util.RegexExpConstantUtil;
+import com.ljx.wamtneln.util.constantutil.ConstantUtil;
+import com.ljx.wamtneln.util.InitStrJsonStr;
+import com.ljx.wamtneln.util.stringutil.MapGetter;
+import com.ljx.wamtneln.util.constantutil.RegexExpConstantUtil;
+import com.ljx.wamtneln.util.stringutil.RegexMatchUtil;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -42,18 +44,6 @@ import java.util.regex.Pattern;
 public class WechatPayUtil {
     private static final Log LOG = LogFactory.getLog(WechatPayUtil.class);
     /**
-     * 微信商户appkey
-     */
-    private static final String APP_KEY = "UYGWEDIUAWJSOF45256456465DSFSDFG";
-    /**
-     * 微信商户证书路径；java开发使用apiclient_cert.p12，php开发使用apiclient_cert.pem
-     */
-    private static final String CERT_PATH = "D:\\demo\\apiclient_cert.p12";
-    /**
-     * 微信支付接口
-     */
-    private static final String TRANS_URL = "https://api.mch.weixin.qq.com/mmpaymkttransfers/promotion/transfers";
-    /**
      * 请求器的配置
      */
     private static RequestConfig requestConfig;
@@ -62,76 +52,6 @@ public class WechatPayUtil {
      */
     private static CloseableHttpClient httpClient;
 
-    public static void main(String[] args) {
-        // 微信支付红包完整调用示例
-        wxPayHbServiceFunTest();
-    }
-
-    /**
-     * 微信支付红包完整调用示例
-     * wxPayHbServiceFunTest()推荐写在微信红包接口的业务逻辑层
-     * @return
-     */
-    public static String wxPayHbServiceFunTest(){
-        // 微信接口请求参数, 根据实际情况填写
-        WechatPayReqDTO wechatPayReqDTO = createWechatPayReqDTO();
-        String rstMsg="";
-        // 拼接微信红包支付接口请求xml报文
-        String reqXmlStr= WechatPayUtil.jointWechatPayReqXml(wechatPayReqDTO).toString();
-        try{
-            // 调用http post请求
-            String rstXmlStr = WechatPayUtil.hbCallHttpPost( reqXmlStr, wechatPayReqDTO);
-            // 正则获取微信返回码
-            String bb=  WechatPayUtil.ergoticMyregStrFun3BackMatcherData(rstXmlStr, RegexExpConstantUtil.REGEX_RETURN_CODE);
-            // SUCCESS
-            String returnCode= WechatPayUtil.regReplaceAll(bb,RegexExpConstantUtil.REGEX_RETURN_CODE_CONTENT);
-            if(rstXmlStr.contains(ConstantUtil.STR_WX_RETURN_CODE_SUCCESS)&& !rstXmlStr.contains(ConstantUtil.STR_WX_RETURN_CODE_PAYFAIL)){
-                rstMsg= "微信支付到零钱成功";
-            }
-            else{
-                rstMsg= "调用微信接口失败, 具体信息请查看访问日志";
-            }
-        }
-        catch (Exception e){
-            e.printStackTrace();
-            rstMsg= e.getMessage();
-        }
-        return rstMsg;
-    }
-    /**
-     * 生成微信请求参数对象
-     * @param
-     * @param
-     * @return
-     */
-    public static WechatPayReqDTO createWechatPayReqDTO(){
-        // 微信接口请求参数, 根据实际情况填写
-        WechatPayReqDTO wechatPayReqDTO = new WechatPayReqDTO();
-        // 申请商户号的appid或商户号绑定的appid
-        wechatPayReqDTO.setMch_appid("wx5578d2c602fbe8a6");
-        // 商户号
-        wechatPayReqDTO.setMchid("1372809402");
-        // 商户名称
-        wechatPayReqDTO.setMch_name("某某商户名称");
-        // 商户appid下，绑定的某微信用户的openid；此微信用户零钱将收款3毛
-        wechatPayReqDTO.setOpenid("开发人员|测试人员|收款者手机微信的openid");
-        // 企业付款金额，这里单位为元
-        wechatPayReqDTO.setAmount(0.3);
-        // 微信商户appkey
-        wechatPayReqDTO.setAppkey(APP_KEY);
-        // 微信商户证书路径
-        wechatPayReqDTO.setCert_path(CERT_PATH);
-        // 微信支付接口
-        wechatPayReqDTO.setTrans_url(TRANS_URL);
-        // 业务相关需求字段：红包来源标志 0会员红包、1问卷红包
-        String hblybz="1";
-        if(ConstantUtil.STR_HBLYBZ_0.equals(hblybz)){
-            wechatPayReqDTO.setDesc("会员红包");
-        }else{
-            wechatPayReqDTO.setDesc("问卷红包");
-        }
-        return wechatPayReqDTO;
-    }
     /**
      * 拼接微信红包支付接口请求xml报文
      * @param wechatPayReqDTO
@@ -265,7 +185,7 @@ public class WechatPayUtil {
 
         // 订单号默认用商户号+时间戳+4位随机数+可以根据自己的规则进行调整
         wechatPayReqDTO.setAppkey(wechatPayReqDTO.getAppkey());
-        wechatPayReqDTO.setNonce_str(WechatPayUtil.getNonce_str());
+        wechatPayReqDTO.setNonce_str(InitStrJsonStr.initLen15NonceStr());
         wechatPayReqDTO.setPartner_trade_no(wechatPayReqDTO.getMchid()
                                   + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date())
                                   + (int)((Math.random() * 9 + 1) * 1000));
@@ -299,72 +219,5 @@ public class WechatPayUtil {
         }
         String prestr=preSb.toString();
         return prestr;
-    }
-
-    /**
-     * 生成随机字符串
-     * @return
-     */
-    private static String getNonce_str()
-    {
-        String base = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        Random random = new Random();
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < 15; i++ )
-        {
-            int number = random.nextInt(base.length());
-            sb.append(base.charAt(number));
-        }
-        return sb.toString();
-    }
-    /**
-     *
-     * @Description: 正则匹配方式3，遍历源完整字符串，依次正则匹配，若匹配成功则返回匹配结果
-     * @param fatherStr	源完整字符串
-     * @param myregStr	源子字符串（正则表达式字符串）
-     * @return
-     * @throws
-     * @Remark
-     */
-    public static String ergoticMyregStrFun3BackMatcherData(String fatherStr,String myregStr) {
-        // 将一个String类型的正则表达式，封装到模式器Pattern中。
-        Pattern p = Pattern.compile(myregStr);
-        // 通过模式器对象p中的matcher方法，又获取到了一个匹配器对象m。
-        Matcher m = p.matcher(fatherStr);
-        // 定义一个List，用于存取正则匹配目标字符串
-        String rstStr ="";
-        // 遍历匹配结果方式1
-        while(true){
-        	/*
-				调用匹配器对象m的方法，将整个输入串，匹配正则表达式。
-				m.find()	部分匹配\匹配到子串：
-							此方法从匹配器Matcher区域的开头开始，如果该方法的上一次调用成功了，井且从那时开始匹配器没有被重置；则从上一次匹配操作没有匹配的第一个字符开始。
-							即查找整个输入串中与正则表达式匹配的下一个子串，只要存在匹配的子串就返回true，否则返回false。
-							如果matcher.find()返回true，则可以使用matcher.start()、matcher.end()、matcher.group()方法获取详细信息。
-							实际上，只有执行了matcher.find()方法 后，状态机matcher才是真正开始进行匹配工作的！
-        	 */
-            if(m.find()) {
-                // m.group()方法返回匹配到的子字符串
-                if(m.group()!="" && !"".equals(m.group())) {
-                    // "src=http:baidu.com/test.jpg"
-                    String matchDataStr=m.group();
-                    // "http:baidu.com/test.jpg"
-                    matchDataStr=matchDataStr.replace("src=", "");
-                    rstStr=matchDataStr;
-                }
-            }else {
-                break;
-            }
-        }
-        return rstStr;
-    }
-    public static String regReplaceAll(String fatherStr,String myregStr){
-        //p为正则表达式
-        Pattern p = Pattern.compile(myregStr);
-        Matcher m = p.matcher(fatherStr);
-        //将符合正则表达式的字符串，替换成""
-        String dd= m.replaceAll("");
-        System.out.println(dd);
-        return dd;
     }
 }
