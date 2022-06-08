@@ -16,11 +16,11 @@ public class ConstantUtil {
     /**
      * 连接超时时间，默认10秒
      */
-    public static final int INT_SOCKET_TIMEOUT = 10000;
+    public static final int INT_SOCKET_TIMEOUT_10000 = 10000;
     /**
      * 传输超时时间，默认30秒
      */
-    public static final int INT_CONNECT_TIMEOUT = 30000;
+    public static final int INT_CONNECT_TIMEOUT_30000 = 30000;
     /**
      * 业务相关需求字段：红包来源标志 0会员红包、1问卷红包
      */

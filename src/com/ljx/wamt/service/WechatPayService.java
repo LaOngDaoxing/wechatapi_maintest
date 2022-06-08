@@ -83,8 +83,8 @@ public class WechatPayService {
         wechatPayReqDTO.setMchid("1372809402");
         // 商户名称
         wechatPayReqDTO.setMch_name("某某商户名称");
-        // 商户appid下，绑定的某微信用户的openid；此微信用户零钱将收款3毛
-        wechatPayReqDTO.setOpenid("开发人员|测试人员|收款者手机微信的openid");
+        // 商户appid下，绑定的某微信用户的openid（开发人员|测试人员|收款者手机微信的openid）；此微信用户零钱将收款3毛
+        wechatPayReqDTO.setOpenid("oQATF5FVew5M44m8DSIu_Ut9nxOQ");
         // 企业付款金额，这里单位为元
         wechatPayReqDTO.setAmount(0.3);
         // 微信商户appkey
@@ -93,6 +93,8 @@ public class WechatPayService {
         wechatPayReqDTO.setCert_path(CERT_PATH);
         // 微信支付接口
         wechatPayReqDTO.setTrans_url(TRANS_URL);
+        // 商户订单号
+        wechatPayReqDTO.setPartner_trade_no("SPXTTZZFWB50142860");
         // 业务相关需求字段：红包来源标志 0会员红包、1问卷红包
         String hblybz="1";
         if(ConstantUtil.STR_HBLYBZ_0.equals(hblybz)){

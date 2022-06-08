@@ -42,7 +42,18 @@ import java.util.regex.Pattern;
  * 微信支付|开发文档 境内普通用户https://pay.weixin.qq.com/wiki/doc/api/tools/mch_pay.php?chapter=14_2
  */
 public class WechatPayUtil {
-    private static final Log LOG = LogFactory.getLog(WechatPayUtil.class);
+    private static final Log LOG = LogFactory.getLog(WechatPayUtil.class);    /**
+     * 微信商户appkey
+     */
+    private static final String APP_KEY = "UYGWEDIUAWJSOF45256456465DSFSDFG";
+    /**
+     * 微信商户证书路径；java开发使用apiclient_cert.p12，php开发使用apiclient_cert.pem
+     */
+    private static final String CERT_PATH = "D:\\demo\\apiclient_cert.p12";
+    /**
+     * 微信支付接口
+     */
+    private static final String TRANS_URL = "https://api.mch.weixin.qq.com/mmpaymkttransfers/promotion/transfers";
     /**
      * 请求器的配置
      */
@@ -52,6 +63,78 @@ public class WechatPayUtil {
      */
     private static CloseableHttpClient httpClient;
 
+    public static void main(String[] args) {
+        // 微信支付红包完整调用示例
+        wxPayHbServiceFunTest();
+    }
+
+    /**
+     * 微信支付红包完整调用示例
+     * wxPayHbServiceFunTest()推荐写在微信红包接口的业务逻辑层
+     * @return
+     */
+    public static String wxPayHbServiceFunTest(){
+        // 微信接口请求参数, 根据实际情况填写
+        WechatPayReqDTO wechatPayReqDTO = createWechatPayReqDTO();
+        String rstMsg="";
+        // 拼接微信红包支付接口请求xml报文
+        String reqXmlStr= WechatPayUtil.jointWechatPayReqXml(wechatPayReqDTO).toString();
+        try{
+            // 调用http post请求
+            String rstXmlStr = WechatPayUtil.hbCallHttpPost( reqXmlStr, wechatPayReqDTO);
+            // 正则获取微信返回码
+            String bb=  RegexMatchUtil.matchOneByPatternCompileMatchGroup(rstXmlStr, RegexExpConstantUtil.REGEX_RETURN_CODE,null,null);
+            // SUCCESS
+            String returnCode= RegexMatchUtil.regReplaceAll(bb,RegexExpConstantUtil.REGEX_RETURN_CODE_CONTENT);
+            if(rstXmlStr.contains(ConstantUtil.STR_WX_RETURN_CODE_SUCCESS)&& !rstXmlStr.contains(ConstantUtil.STR_WX_RETURN_CODE_PAYFAIL)){
+                rstMsg= "微信支付到零钱成功";
+            }
+            else{
+                rstMsg= "调用微信接口失败, 具体信息请查看访问日志";
+            }
+        }
+        catch (Exception e){
+            e.printStackTrace();
+            rstMsg= e.getMessage();
+        }
+        return rstMsg;
+    }
+    /**
+     * 生成微信请求参数对象
+     * @param
+     * @param
+     * @return
+     */
+    public static WechatPayReqDTO createWechatPayReqDTO(){
+        // 微信接口请求参数, 根据实际情况填写
+        WechatPayReqDTO wechatPayReqDTO = new WechatPayReqDTO();
+        // 申请商户号的appid或商户号绑定的appid
+        wechatPayReqDTO.setMch_appid("wx5578d2c602fbe8a6");
+        // 商户号
+        wechatPayReqDTO.setMchid("1372809402");
+        // 商户名称
+        wechatPayReqDTO.setMch_name("河北壹捌掌信息科技有限公司");
+        // 商户appid下，绑定的某微信用户的openid（开发人员|测试人员|收款者手机微信的openid）；此微信用户零钱将收款3毛
+        wechatPayReqDTO.setOpenid("oQATF5FVew5M44m8DSIu_Ut9nxOQ");
+        // 企业付款金额，这里单位为元
+        wechatPayReqDTO.setAmount(0.3);
+        // 微信商户appkey
+        wechatPayReqDTO.setAppkey(APP_KEY);
+        // 微信商户证书路径
+        wechatPayReqDTO.setCert_path(CERT_PATH);
+        // 微信支付接口
+        wechatPayReqDTO.setTrans_url(TRANS_URL);
+        // 商户订单号
+        wechatPayReqDTO.setPartner_trade_no("SPXTTZZFWB50142860");
+        // 业务相关需求字段：红包来源标志 0会员红包、1问卷红包
+        String hblybz="1";
+        if(ConstantUtil.STR_HBLYBZ_0.equals(hblybz)){
+            wechatPayReqDTO.setDesc("会员红包");
+        }else{
+            wechatPayReqDTO.setDesc("问卷红包");
+        }
+        return wechatPayReqDTO;
+    }
     /**
      * 拼接微信红包支付接口请求xml报文
      * @param wechatPayReqDTO
@@ -125,7 +208,7 @@ public class WechatPayUtil {
                 SSLConnectionSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER);
         httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build();
         // 根据默认超时限制初始化requestConfig
-        requestConfig = RequestConfig.custom().setSocketTimeout(ConstantUtil.INT_SOCKET_TIMEOUT).setConnectTimeout(ConstantUtil.INT_CONNECT_TIMEOUT).build();
+        requestConfig = RequestConfig.custom().setSocketTimeout(ConstantUtil.INT_SOCKET_TIMEOUT_10000).setConnectTimeout(ConstantUtil.INT_CONNECT_TIMEOUT_30000).build();
     }
     /**
      * 调用http post请求
@@ -183,12 +266,13 @@ public class WechatPayUtil {
         // 微信签名规则 https://pay.weixin.qq.com/wiki/doc/api/tools/mch_pay.php?chapter=4_3
         Map<String, Object> paramMap = new HashMap<String, Object>(MapGetter.defaultInitialCapacity());
 
-        // 订单号默认用商户号+时间戳+4位随机数+可以根据自己的规则进行调整
+        // 商户订单号partner_trade_no：默认用商户号+时间戳+4位随机数+可以根据自己的规则进行调整；注意商户订单号将用于发红包公司和微信对账使用，必须唯一。
         wechatPayReqDTO.setAppkey(wechatPayReqDTO.getAppkey());
         wechatPayReqDTO.setNonce_str(InitStrJsonStr.initLen15NonceStr());
-        wechatPayReqDTO.setPartner_trade_no(wechatPayReqDTO.getMchid()
-                                  + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date())
-                                  + (int)((Math.random() * 9 + 1) * 1000));
+        // 仅main方法测试时使用随机生成的商户订单号
+//        wechatPayReqDTO.setPartner_trade_no(wechatPayReqDTO.getMchid()
+//                                  + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date())
+//                                  + (int)((Math.random() * 9 + 1) * 1000));
 
         paramMap.put("mch_appid", wechatPayReqDTO.getMch_appid());
         paramMap.put("mchid", wechatPayReqDTO.getMchid());
