@@ -25,7 +25,8 @@ public class ConstantUtil {
      * 业务相关需求字段：红包来源标志 0会员红包、1问卷红包
      */
     public static final String STR_HBLYBZ_0="0";
-    public static final String STR_WX_RETURN_CODE_SUCCESS="CDATA[SUCCESS]";
+    public static final String STR_WX_RETURN_CODE_SUCCESS="<return_code><![CDATA[SUCCESS]]></return_code>";
+    public static final String STR_WX_RETURN_MSG_SUCCESS="<return_msg><![CDATA[]]></return_msg>";
     public static final String STR_WX_RETURN_CODE_FAIL="CDATA[FAIL]";
     public static final String STR_WX_RETURN_CODE_PAYFAIL="CDATA[支付失败]";
 }

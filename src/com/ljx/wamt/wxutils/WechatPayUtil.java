@@ -76,7 +76,7 @@ public class WechatPayUtil {
      */
     public static String wxPayHbServiceFunTest(){
         // 微信接口请求参数, 根据实际情况填写
-        WechatPayReqDTO wechatPayReqDTO = createWechatPayReqDTO();
+        WechatPayReqDTO wechatPayReqDTO = createWechatPayReqDTOServiceFun();
         String rstMsg="";
         // 拼接微信红包支付接口请求xml报文
         String reqXmlStr= WechatPayUtil.jointWechatPayReqXml(wechatPayReqDTO).toString();
@@ -87,7 +87,7 @@ public class WechatPayUtil {
             String bb=  RegexMatchUtil.matchOneByPatternCompileMatchGroup(rstXmlStr, RegexExpConstantUtil.REGEX_RETURN_CODE,null,null);
             // SUCCESS
             String returnCode= RegexMatchUtil.regReplaceAll(bb,RegexExpConstantUtil.REGEX_RETURN_CODE_CONTENT);
-            if(rstXmlStr.contains(ConstantUtil.STR_WX_RETURN_CODE_SUCCESS)&& !rstXmlStr.contains(ConstantUtil.STR_WX_RETURN_CODE_PAYFAIL)){
+            if(rstXmlStr.contains(ConstantUtil.STR_WX_RETURN_CODE_SUCCESS)&& rstXmlStr.contains(ConstantUtil.STR_WX_RETURN_MSG_SUCCESS)){
                 rstMsg= "微信支付到零钱成功";
             }
             else{
@@ -106,7 +106,7 @@ public class WechatPayUtil {
      * @param
      * @return
      */
-    public static WechatPayReqDTO createWechatPayReqDTO(){
+    public static WechatPayReqDTO createWechatPayReqDTOServiceFun(){
         // 微信接口请求参数, 根据实际情况填写
         WechatPayReqDTO wechatPayReqDTO = new WechatPayReqDTO();
         // 申请商户号的appid或商户号绑定的appid
