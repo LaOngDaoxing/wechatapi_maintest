@@ -42,7 +42,8 @@ import java.util.regex.Pattern;
  * 微信支付|开发文档 境内普通用户https://pay.weixin.qq.com/wiki/doc/api/tools/mch_pay.php?chapter=14_2
  */
 public class WechatPayUtil {
-    private static final Log LOG = LogFactory.getLog(WechatPayUtil.class);    /**
+    private static final Log LOG = LogFactory.getLog(WechatPayUtil.class);
+    /**
      * 微信商户appkey
      */
     private static final String APP_KEY = "UYGWEDIUAWJSOF45256456465DSFSDFG";
@@ -286,7 +287,7 @@ public class WechatPayUtil {
 
         List<String> keys = new ArrayList(paramMap.keySet());
         Collections.sort(keys);
-        StringBuilder preSb = new StringBuilder();
+        StringBuffer preSb = new StringBuffer();
         for (int i = 0; i < keys.size(); i++ )
         {
             String key = keys.get(i);
@@ -294,11 +295,11 @@ public class WechatPayUtil {
             if (i == keys.size() - 1)
             {
                 // 拼接时，不包括最后一个&字符
-                preSb.append(preSb + key + "=" + value);
+                preSb.append( key + "=" + value);
             }
             else
             {
-                preSb.append(preSb + key + "=" + value + "&");
+                preSb.append( key + "=" + value + "&");
             }
         }
         String prestr=preSb.toString();
